@@ -24,7 +24,7 @@ export const Hero = () => {
           transition={{ delay: 0.2, duration: 0.5 }}
         >
           <span className="inline-block px-4 py-1 mb-4 text-sm bg-primary/90 text-primary-foreground rounded-full">
-            Discover World Cuisines
+            Monthly Surprise Boxes
           </span>
         </motion.div>
         
@@ -34,7 +34,7 @@ export const Hero = () => {
           transition={{ delay: 0.3, duration: 0.5 }}
           className="text-4xl md:text-6xl font-bold text-white mb-6"
         >
-          Taste Atlas
+          Taste Atlas Box
         </motion.h1>
         
         <motion.p
@@ -43,7 +43,7 @@ export const Hero = () => {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-8"
         >
-          Journey through Mediterranean and Mesopotamian culinary traditions
+          Discover handpicked delicacies from Mediterranean and Mesopotamian regions delivered to your door
         </motion.p>
         
         <motion.button
@@ -54,7 +54,7 @@ export const Hero = () => {
           whileTap={{ scale: 0.95 }}
           className="px-8 py-3 bg-white text-gray-900 rounded-full font-medium hover:bg-white/90 transition-colors"
         >
-          Explore Cuisines
+          Get Your Box
         </motion.button>
       </div>
     </motion.section>
