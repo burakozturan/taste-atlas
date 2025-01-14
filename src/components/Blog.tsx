@@ -78,7 +78,7 @@ export const Blog = () => {
                 <p className="text-gray-600 mb-4">{post.excerpt}</p>
                 <Link 
                   to={`/blog/${post.id}`}
-                  className="text-primary font-medium hover:text-primary/80 transition-colors"
+                  className="inline-flex items-center text-primary font-medium hover:text-primary/80 transition-colors"
                 >
                   Read More →
                 </Link>
