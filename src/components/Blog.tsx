@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const blogPosts = [
   {
@@ -75,9 +76,12 @@ export const Blog = () => {
                   {post.title}
                 </h3>
                 <p className="text-gray-600 mb-4">{post.excerpt}</p>
-                <button className="text-primary font-medium hover:text-primary/80 transition-colors">
+                <Link 
+                  to={`/blog/${post.id}`}
+                  className="text-primary font-medium hover:text-primary/80 transition-colors"
+                >
                   Read More →
-                </button>
+                </Link>
               </div>
             </motion.article>
           ))}
