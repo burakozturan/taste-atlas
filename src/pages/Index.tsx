@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Hero } from "@/components/Hero";
 import { FeaturedCuisines } from "@/components/FeaturedCuisines";
 import { Newsletter } from "@/components/Newsletter";
+import { Blog } from "@/components/Blog";
 import { motion, useScroll, useSpring } from "framer-motion";
 
 const Index = () => {
@@ -24,6 +25,7 @@ const Index = () => {
       />
       <Hero />
       <FeaturedCuisines />
+      <Blog />
       <Newsletter />
     </div>
   );
