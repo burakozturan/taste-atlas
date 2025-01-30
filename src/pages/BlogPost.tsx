@@ -1,82 +1,19 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Edit } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useBlogPosts, type BlogPost } from "@/hooks/useBlogPosts";
 
-// Move this to a separate file later if the app grows
-interface BlogPost {
-  id: string;
-  title: string;
-  content: string;
-  image: string;
-  date: string;
-  category: string;
-}
-
-const defaultBlogPosts: BlogPost[] = [
-  {
-    id: "1",
-    title: "Ancient Grains of Mesopotamia",
-    content: "Discover the rich history of grains that shaped civilization. From the fertile valleys of ancient Mesopotamia came the first cultivated wheat and barley, forever changing human society.",
-    image: "/placeholder.svg",
-    date: "March 15, 2024",
-    category: "History"
-  },
-  {
-    id: "2",
-    title: "Mediterranean Spice Routes",
-    content: "Journey through the historic spice trading paths that connected ancient civilizations. These routes were more than just trade networks - they were channels of cultural exchange.",
-    image: "/placeholder.svg",
-    date: "March 10, 2024",
-    category: "Culture"
-  },
-  {
-    id: "3",
-    title: "Traditional Preservation Methods",
-    content: "Learn about ancient food preservation techniques that have stood the test of time. From salting and smoking to fermentation, these methods ensured survival and created unique delicacies.",
-    image: "/placeholder.svg",
-    date: "March 5, 2024",
-    category: "Techniques"
-  }
-];
-
-// Helper functions for localStorage
-const getBlogPosts = (): BlogPost[] => {
-  const stored = localStorage.getItem('blogPosts');
-  if (!stored) {
-    localStorage.setItem('blogPosts', JSON.stringify(defaultBlogPosts));
-    return defaultBlogPosts;
-  }
-  return JSON.parse(stored);
-};
-
-const updateBlogPost = (updatedPost: BlogPost) => {
-  const posts = getBlogPosts();
-  const updatedPosts = posts.map(post => 
-    post.id === updatedPost.id ? updatedPost : post
-  );
-  localStorage.setItem('blogPosts', JSON.stringify(updatedPosts));
-  return updatedPosts;
-};
-
-const BlogPost = () => {
+const BlogPostPage = () => {
   const { id } = useParams();
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState("");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const { toast } = useToast();
-  const [post, setPost] = useState<BlogPost | null>(null);
+  const { posts, updatePost, uploadImage } = useBlogPosts();
+  const post = posts?.find(post => post.id === id);
   
-  useEffect(() => {
-    const posts = getBlogPosts();
-    const foundPost = posts.find(post => post.id === id);
-    if (foundPost) {
-      setPost(foundPost);
-      setEditedContent(foundPost.content);
-    }
-  }, [id]);
-
   if (!post) {
     return <div>Post not found</div>;
   }
@@ -92,25 +29,24 @@ const BlogPost = () => {
     setEditedContent(event.target.value);
   };
 
-  const handleSave = () => {
-    // Create a new post object with the updated content
-    const updatedPost: BlogPost = {
-      ...post,
-      content: editedContent,
-      // If there's a selected image, we would typically upload it to a server
-      // and get back a URL. For now, we'll just keep the existing image
-      image: selectedImage ? URL.createObjectURL(selectedImage) : post.image,
-    };
+  const handleSave = async () => {
+    try {
+      let imageUrl = post.image_url;
+      
+      if (selectedImage) {
+        imageUrl = await uploadImage(selectedImage);
+      }
 
-    // Update localStorage and state
-    updateBlogPost(updatedPost);
-    setPost(updatedPost);
-    
-    toast({
-      title: "Changes saved successfully",
-      description: "Your blog post has been updated and saved.",
-    });
-    setIsEditing(false);
+      await updatePost.mutateAsync({
+        ...post,
+        content: editedContent,
+        image_url: imageUrl,
+      });
+
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving post:', error);
+    }
   };
 
   const handleEditClick = () => {
@@ -164,7 +100,7 @@ const BlogPost = () => {
                 className="w-full min-h-[400px] p-4 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 value={editedContent}
                 onChange={handleContentChange}
-                placeholder="Write your content here (Markdown supported)..."
+                placeholder="Write your content here..."
               />
 
               <div className="mt-6 flex justify-end gap-4">
@@ -191,7 +127,7 @@ const BlogPost = () => {
                 </span>
               </div>
               <img
-                src={selectedImage ? URL.createObjectURL(selectedImage) : post.image}
+                src={post.image_url}
                 alt={post.title}
                 className="w-full h-64 object-cover rounded-lg mb-6"
               />
@@ -205,4 +141,4 @@ const BlogPost = () => {
   );
 };
 
-export default BlogPost;
+export default BlogPostPage;
