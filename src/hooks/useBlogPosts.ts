@@ -76,46 +76,16 @@ export const useBlogPosts = () => {
   });
 
   const updatePost = useMutation({
-    mutationFn: async (post: BlogPost) => {
-      console.log('Updating post with data:', post);
+    mutationFn: async ({ id, content, image_url }: { id: string; content: string; image_url?: string }) => {
+      console.log('Updating post with data:', { id, content, image_url });
       
-      // First check if the post exists
-      const { data: existingPost, error: checkError } = await supabase
-        .from('blog_posts')
-        .select()
-        .eq('id', post.id)
-        .maybeSingle();
-
-      if (checkError) {
-        console.error('Error checking post existence:', checkError);
-        toast({
-          title: 'Error',
-          description: 'Failed to verify post existence',
-          variant: 'destructive',
-        });
-        throw checkError;
-      }
-
-      if (!existingPost) {
-        const error = new Error('Post not found');
-        toast({
-          title: 'Post Not Found',
-          description: 'This blog post does not exist. Please return to the blog listing.',
-          variant: 'destructive',
-        });
-        throw error;
-      }
-
-      // If post exists, proceed with update
       const { data, error } = await supabase
         .from('blog_posts')
-        .update({
-          title: post.title,
-          content: post.content,
-          image_url: post.image_url,
-          category: post.category,
+        .update({ 
+          content,
+          ...(image_url && { image_url })
         })
-        .eq('id', post.id)
+        .eq('id', id)
         .select()
         .maybeSingle();
 
