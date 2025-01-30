@@ -23,7 +23,6 @@ export const useBlogPosts = () => {
         .order('date', { ascending: false });
 
       if (error) {
-        // Check specifically for the missing table error
         if (error.code === '42P01') {
           console.error('Blog posts table is missing. Please create it using the SQL commands shown in the toast message.');
           
@@ -51,9 +50,14 @@ export const useBlogPosts = () => {
               '  ON public.blog_posts\n' +
               '  FOR SELECT\n' +
               '  TO anon\n' +
+              '  USING (true);\n\n' +
+              'CREATE POLICY "Enable insert for authenticated users only"\n' +
+              '  ON public.blog_posts\n' +
+              '  FOR UPDATE\n' +
+              '  TO authenticated\n' +
               '  USING (true);',
             variant: 'destructive',
-            duration: 15000, // Show for 15 seconds to give time to read
+            duration: 15000,
           });
         } else {
           toast({
@@ -73,24 +77,17 @@ export const useBlogPosts = () => {
     mutationFn: async (post: BlogPost) => {
       const { error } = await supabase
         .from('blog_posts')
-        .update(post)
+        .update({
+          content: post.content,
+          image_url: post.image_url,
+        })
         .eq('id', post.id);
 
       if (error) throw error;
+      return post;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
-      toast({
-        title: 'Success',
-        description: 'Blog post updated successfully',
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Error updating post',
-        description: error.message,
-        variant: 'destructive',
-      });
     },
   });
 

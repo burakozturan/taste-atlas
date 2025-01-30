@@ -54,14 +54,12 @@ const BlogPostPage = () => {
       setIsEditing(false);
       setSelectedImage(null);
 
-      // Show success toast
       toast({
         title: "Success",
         description: "Your changes have been saved successfully.",
       });
     } catch (error) {
       console.error('Error saving post:', error);
-      // Show error toast
       toast({
         title: "Error",
         description: "Failed to save changes. Please try again.",
