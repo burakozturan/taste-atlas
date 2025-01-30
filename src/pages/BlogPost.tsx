@@ -1,10 +1,20 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Edit } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
-const blogPosts = [
+// Move this to a separate file later if the app grows
+interface BlogPost {
+  id: string;
+  title: string;
+  content: string;
+  image: string;
+  date: string;
+  category: string;
+}
+
+const defaultBlogPosts: BlogPost[] = [
   {
     id: "1",
     title: "Ancient Grains of Mesopotamia",
@@ -31,14 +41,41 @@ const blogPosts = [
   }
 ];
 
+// Helper functions for localStorage
+const getBlogPosts = (): BlogPost[] => {
+  const stored = localStorage.getItem('blogPosts');
+  if (!stored) {
+    localStorage.setItem('blogPosts', JSON.stringify(defaultBlogPosts));
+    return defaultBlogPosts;
+  }
+  return JSON.parse(stored);
+};
+
+const updateBlogPost = (updatedPost: BlogPost) => {
+  const posts = getBlogPosts();
+  const updatedPosts = posts.map(post => 
+    post.id === updatedPost.id ? updatedPost : post
+  );
+  localStorage.setItem('blogPosts', JSON.stringify(updatedPosts));
+  return updatedPosts;
+};
+
 const BlogPost = () => {
   const { id } = useParams();
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState("");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const { toast } = useToast();
+  const [post, setPost] = useState<BlogPost | null>(null);
   
-  const post = blogPosts.find(post => post.id === id);
+  useEffect(() => {
+    const posts = getBlogPosts();
+    const foundPost = posts.find(post => post.id === id);
+    if (foundPost) {
+      setPost(foundPost);
+      setEditedContent(foundPost.content);
+    }
+  }, [id]);
 
   if (!post) {
     return <div>Post not found</div>;
@@ -56,16 +93,26 @@ const BlogPost = () => {
   };
 
   const handleSave = () => {
-    // Here you would typically make an API call to save the changes
-    // For now, we'll just show a success message
+    // Create a new post object with the updated content
+    const updatedPost: BlogPost = {
+      ...post,
+      content: editedContent,
+      // If there's a selected image, we would typically upload it to a server
+      // and get back a URL. For now, we'll just keep the existing image
+      image: selectedImage ? URL.createObjectURL(selectedImage) : post.image,
+    };
+
+    // Update localStorage and state
+    updateBlogPost(updatedPost);
+    setPost(updatedPost);
+    
     toast({
       title: "Changes saved successfully",
-      description: "Your blog post has been updated.",
+      description: "Your blog post has been updated and saved.",
     });
     setIsEditing(false);
   };
 
-  // Initialize editedContent when entering edit mode
   const handleEditClick = () => {
     setEditedContent(post.content);
     setIsEditing(true);
@@ -149,7 +196,7 @@ const BlogPost = () => {
                 className="w-full h-64 object-cover rounded-lg mb-6"
               />
               <h1 className="text-3xl font-bold mb-6">{post.title}</h1>
-              <p className="text-gray-600">{editedContent || post.content}</p>
+              <p className="text-gray-600">{post.content}</p>
             </article>
           )}
         </motion.div>
