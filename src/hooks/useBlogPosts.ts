@@ -84,6 +84,7 @@ export const useBlogPosts = () => {
         .from('blog_posts')
         .select()
         .eq('id', post.id)
+        .order('id', { ascending: true })
         .limit(1)
         .single();
 
@@ -118,6 +119,7 @@ export const useBlogPosts = () => {
         })
         .eq('id', post.id)
         .select()
+        .order('id', { ascending: true })
         .limit(1)
         .single();
 
