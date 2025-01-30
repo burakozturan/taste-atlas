@@ -40,7 +40,35 @@ export const useBlogPosts = () => {
     mutationFn: async ({ id, content, image_url }: { id: string; content: string; image_url?: string }) => {
       console.log('Updating post with data:', { id, content, image_url });
       
-      const { data, error } = await supabase
+      // First check if the post exists
+      const { data: existingPost, error: checkError } = await supabase
+        .from('blog_posts')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('Error checking post:', checkError);
+        toast({
+          title: 'Error checking post',
+          description: checkError.message,
+          variant: 'destructive',
+        });
+        throw checkError;
+      }
+
+      if (!existingPost) {
+        const error = new Error('Post not found');
+        toast({
+          title: 'Error',
+          description: 'The blog post you are trying to update does not exist',
+          variant: 'destructive',
+        });
+        throw error;
+      }
+
+      // If post exists, proceed with update
+      const { data, error: updateError } = await supabase
         .from('blog_posts')
         .update({ 
           content,
@@ -48,13 +76,23 @@ export const useBlogPosts = () => {
         })
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        console.error('Error updating post:', error);
+      if (updateError) {
+        console.error('Error updating post:', updateError);
         toast({
           title: 'Error updating post',
-          description: error.message,
+          description: updateError.message,
+          variant: 'destructive',
+        });
+        throw updateError;
+      }
+
+      if (!data) {
+        const error = new Error('Failed to update post');
+        toast({
+          title: 'Error',
+          description: 'Failed to update the blog post',
           variant: 'destructive',
         });
         throw error;
