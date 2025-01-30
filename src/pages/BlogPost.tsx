@@ -44,13 +44,12 @@ const BlogPostPage = () => {
         imageUrl = await uploadImage(selectedImage);
       }
 
-      const updatedPost = {
+      await updatePost.mutateAsync({
         ...post,
         content: editedContent,
         image_url: imageUrl,
-      };
+      });
 
-      await updatePost.mutateAsync(updatedPost);
       setIsEditing(false);
       setSelectedImage(null);
 
@@ -88,11 +87,11 @@ const BlogPostPage = () => {
       <div className="min-h-screen bg-stone-50 py-20 px-4">
         <div className="max-w-4xl mx-auto">
           <Link 
-            to="/" 
+            to="/blog" 
             className="inline-flex items-center gap-2 text-primary hover:text-primary/80 mb-8"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Home
+            Back to Blog
           </Link>
           
           <Alert variant="destructive">
@@ -111,11 +110,11 @@ const BlogPostPage = () => {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <Link 
-            to="/" 
+            to="/blog" 
             className="inline-flex items-center gap-2 text-primary hover:text-primary/80"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Home
+            Back to Blog
           </Link>
           <button
             onClick={isEditing ? () => setIsEditing(false) : handleEditClick}
