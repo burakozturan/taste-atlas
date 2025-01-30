@@ -25,9 +25,35 @@ export const useBlogPosts = () => {
       if (error) {
         // Check specifically for the missing table error
         if (error.code === '42P01') {
+          const sqlInstructions = `
+CREATE TABLE public.blog_posts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  date TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('UTC', NOW()),
+  category TEXT NOT NULL
+);
+
+-- Insert sample data
+INSERT INTO public.blog_posts (title, content, image_url, date, category)
+VALUES 
+  ('Ancient Grains of Mesopotamia', 'Discover the rich history of grains that shaped civilization...', '/placeholder.svg', NOW(), 'History'),
+  ('Mediterranean Spice Routes', 'Journey through the historic spice trading paths...', '/placeholder.svg', NOW(), 'Culture'),
+  ('Traditional Preservation Methods', 'Learn about ancient food preservation techniques...', '/placeholder.svg', NOW(), 'Techniques');
+
+-- Enable RLS and add policies
+ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow anonymous read access"
+  ON public.blog_posts
+  FOR SELECT
+  TO anon
+  USING (true);`;
+
           toast({
             title: 'Database Setup Required',
-            description: 'The blog_posts table is missing. Please create it using the following SQL:\n\nCREATE TABLE public.blog_posts (\n  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,\n  title TEXT NOT NULL,\n  content TEXT NOT NULL,\n  image_url TEXT NOT NULL,\n  date TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE(\'UTC\', NOW()),\n  category TEXT NOT NULL\n);',
+            description: `The blog_posts table is missing. Please go to your Supabase dashboard, open the SQL editor, and run the following SQL commands:\n\n${sqlInstructions}`,
             variant: 'destructive',
           });
         } else {
