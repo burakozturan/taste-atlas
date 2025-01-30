@@ -82,23 +82,22 @@ export const useBlogPosts = () => {
       // First check if the post exists
       const { data: existingPost, error: checkError } = await supabase
         .from('blog_posts')
-        .select('id')
+        .select()
         .eq('id', post.id)
-        .maybeSingle();
+        .single();
 
       if (checkError) {
         console.error('Error checking post existence:', checkError);
+        if (checkError.code === 'PGRST116') {
+          const notFoundError = new Error('Post not found');
+          toast({
+            title: 'Post Not Found',
+            description: 'This blog post does not exist. Please return to the blog listing.',
+            variant: 'destructive',
+          });
+          throw notFoundError;
+        }
         throw checkError;
-      }
-
-      if (!existingPost) {
-        const error = new Error('Post not found');
-        toast({
-          title: 'Post Not Found',
-          description: 'This blog post may have been deleted. Please return to the blog listing.',
-          variant: 'destructive',
-        });
-        throw error;
       }
 
       // If post exists, proceed with update
@@ -112,7 +111,7 @@ export const useBlogPosts = () => {
         })
         .eq('id', post.id)
         .select()
-        .maybeSingle();  // Changed from single() to maybeSingle()
+        .single();
 
       if (error) {
         console.error('Error updating post:', error);
@@ -123,19 +122,7 @@ export const useBlogPosts = () => {
         });
         throw error;
       }
-      
-      if (!data) {
-        const error = new Error('Failed to update post');
-        toast({
-          title: 'Update Failed',
-          description: 'The post could not be updated. Please try again.',
-          variant: 'destructive',
-        });
-        throw error;
-      }
-      
-      console.log('Post updated successfully:', data);
-      
+
       toast({
         title: 'Success',
         description: 'Blog post updated successfully',
