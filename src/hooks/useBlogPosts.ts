@@ -50,23 +50,13 @@ export const useBlogPosts = () => {
         .update(updateData)
         .eq('id', id)
         .select()
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error('Error updating post:', error);
         toast({
           title: 'Error updating post',
           description: error.message,
-          variant: 'destructive',
-        });
-        throw error;
-      }
-
-      if (!data) {
-        const error = new Error('Failed to update post');
-        toast({
-          title: 'Error',
-          description: 'Failed to update the blog post',
           variant: 'destructive',
         });
         throw error;
