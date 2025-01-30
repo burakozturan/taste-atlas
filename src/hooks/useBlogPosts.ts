@@ -25,36 +25,35 @@ export const useBlogPosts = () => {
       if (error) {
         // Check specifically for the missing table error
         if (error.code === '42P01') {
-          const sqlInstructions = `
-CREATE TABLE public.blog_posts (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
-  content TEXT NOT NULL,
-  image_url TEXT NOT NULL,
-  date TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('UTC', NOW()),
-  category TEXT NOT NULL
-);
-
--- Insert sample data
-INSERT INTO public.blog_posts (title, content, image_url, date, category)
-VALUES 
-  ('Ancient Grains of Mesopotamia', 'Discover the rich history of grains that shaped civilization...', '/placeholder.svg', NOW(), 'History'),
-  ('Mediterranean Spice Routes', 'Journey through the historic spice trading paths...', '/placeholder.svg', NOW(), 'Culture'),
-  ('Traditional Preservation Methods', 'Learn about ancient food preservation techniques...', '/placeholder.svg', NOW(), 'Techniques');
-
--- Enable RLS and add policies
-ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Allow anonymous read access"
-  ON public.blog_posts
-  FOR SELECT
-  TO anon
-  USING (true);`;
-
+          console.error('Blog posts table is missing. Please create it using the SQL commands shown in the toast message.');
+          
           toast({
-            title: 'Database Setup Required',
-            description: `The blog_posts table is missing. Please go to your Supabase dashboard, open the SQL editor, and run the following SQL commands:\n\n${sqlInstructions}`,
+            title: '⚠️ Database Setup Required',
+            description: 'The blog_posts table is missing. Please follow these steps:\n\n' +
+              '1. Go to your Supabase dashboard\n' +
+              '2. Open the SQL editor\n' +
+              '3. Copy and paste the SQL commands below\n' +
+              '4. Click "Run"\n\n' +
+              'CREATE TABLE public.blog_posts (\n' +
+              '  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,\n' +
+              '  title TEXT NOT NULL,\n' +
+              '  content TEXT NOT NULL,\n' +
+              '  image_url TEXT NOT NULL,\n' +
+              '  date TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE(\'UTC\', NOW()),\n' +
+              '  category TEXT NOT NULL\n' +
+              ');\n\n' +
+              'INSERT INTO public.blog_posts (title, content, image_url, date, category) VALUES\n' +
+              '  (\'Ancient Grains of Mesopotamia\', \'Discover the rich history of grains that shaped civilization...\', \'/placeholder.svg\', NOW(), \'History\'),\n' +
+              '  (\'Mediterranean Spice Routes\', \'Journey through the historic spice trading paths...\', \'/placeholder.svg\', NOW(), \'Culture\'),\n' +
+              '  (\'Traditional Preservation Methods\', \'Learn about ancient food preservation techniques...\', \'/placeholder.svg\', NOW(), \'Techniques\');\n\n' +
+              'ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;\n\n' +
+              'CREATE POLICY "Allow anonymous read access"\n' +
+              '  ON public.blog_posts\n' +
+              '  FOR SELECT\n' +
+              '  TO anon\n' +
+              '  USING (true);',
             variant: 'destructive',
+            duration: 15000, // Show for 15 seconds to give time to read
           });
         } else {
           toast({
