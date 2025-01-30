@@ -40,52 +40,26 @@ export const useBlogPosts = () => {
     mutationFn: async ({ id, content, image_url }: { id: string; content: string; image_url?: string }) => {
       console.log('Updating post with data:', { id, content, image_url });
       
-      // First check if the post exists
-      const { data: existingPost, error: checkError } = await supabase
+      const updateData = {
+        content,
+        ...(image_url && { image_url })
+      };
+
+      const { data, error } = await supabase
         .from('blog_posts')
-        .select()
+        .update(updateData)
         .eq('id', id)
+        .select()
         .maybeSingle();
 
-      if (checkError) {
-        console.error('Error checking post:', checkError);
+      if (error) {
+        console.error('Error updating post:', error);
         toast({
-          title: 'Error checking post',
-          description: checkError.message,
-          variant: 'destructive',
-        });
-        throw checkError;
-      }
-
-      if (!existingPost) {
-        const error = new Error('Post not found');
-        toast({
-          title: 'Error',
-          description: 'The blog post you are trying to update does not exist',
+          title: 'Error updating post',
+          description: error.message,
           variant: 'destructive',
         });
         throw error;
-      }
-
-      // If post exists, proceed with update
-      const { data, error: updateError } = await supabase
-        .from('blog_posts')
-        .update({ 
-          content,
-          ...(image_url && { image_url })
-        })
-        .eq('id', id)
-        .select()
-        .maybeSingle();
-
-      if (updateError) {
-        console.error('Error updating post:', updateError);
-        toast({
-          title: 'Error updating post',
-          description: updateError.message,
-          variant: 'destructive',
-        });
-        throw updateError;
       }
 
       if (!data) {
@@ -101,7 +75,6 @@ export const useBlogPosts = () => {
       return data as BlogPost;
     },
     onSuccess: (updatedPost) => {
-      // Immediately update the cache with the new data
       queryClient.setQueryData(['blog-posts'], (oldPosts: BlogPost[] | undefined) => {
         if (!oldPosts) return [updatedPost];
         return oldPosts.map(post => 
@@ -109,7 +82,6 @@ export const useBlogPosts = () => {
         );
       });
       
-      // Also invalidate the query to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
       
       toast({
