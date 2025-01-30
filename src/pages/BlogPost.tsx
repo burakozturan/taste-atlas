@@ -4,6 +4,7 @@ import { ArrowLeft, Edit } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useBlogPosts, type BlogPost } from "@/hooks/useBlogPosts";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const BlogPostPage = () => {
   const { id } = useParams();
@@ -11,12 +12,8 @@ const BlogPostPage = () => {
   const [editedContent, setEditedContent] = useState("");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const { toast } = useToast();
-  const { posts, updatePost, uploadImage } = useBlogPosts();
+  const { posts, isLoading, updatePost, uploadImage } = useBlogPosts();
   const post = posts?.find(post => post.id === id);
-  
-  if (!post) {
-    return <div>Post not found</div>;
-  }
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -31,17 +28,19 @@ const BlogPostPage = () => {
 
   const handleSave = async () => {
     try {
-      let imageUrl = post.image_url;
+      let imageUrl = post?.image_url;
       
       if (selectedImage) {
         imageUrl = await uploadImage(selectedImage);
       }
 
-      await updatePost.mutateAsync({
-        ...post,
-        content: editedContent,
-        image_url: imageUrl,
-      });
+      if (post) {
+        await updatePost.mutateAsync({
+          ...post,
+          content: editedContent,
+          image_url: imageUrl,
+        });
+      }
 
       setIsEditing(false);
     } catch (error) {
@@ -50,9 +49,49 @@ const BlogPostPage = () => {
   };
 
   const handleEditClick = () => {
-    setEditedContent(post.content);
-    setIsEditing(true);
+    if (post) {
+      setEditedContent(post.content);
+      setIsEditing(true);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-stone-50 py-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-64 bg-gray-200 rounded"></div>
+            <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-32 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className="min-h-screen bg-stone-50 py-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <Link 
+            to="/" 
+            className="inline-flex items-center gap-2 text-primary hover:text-primary/80 mb-8"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+          </Link>
+          
+          <Alert variant="destructive">
+            <AlertDescription>
+              Post not found. This could be because the blog posts table hasn't been created in the database yet.
+              Please ensure the database is properly set up.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-stone-50 py-20 px-4">

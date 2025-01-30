@@ -25,7 +25,7 @@ export const useBlogPosts = () => {
       if (error) {
         toast({
           title: 'Error fetching posts',
-          description: error.message,
+          description: 'Please ensure the blog_posts table exists in your database.',
           variant: 'destructive',
         });
         throw error;
@@ -51,7 +51,7 @@ export const useBlogPosts = () => {
         description: 'Blog post updated successfully',
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: 'Error updating post',
         description: error.message,
