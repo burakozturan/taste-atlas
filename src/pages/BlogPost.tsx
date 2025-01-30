@@ -3,8 +3,9 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Edit } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useBlogPosts, type BlogPost } from "@/hooks/useBlogPosts";
+import { useBlogPosts } from "@/hooks/useBlogPosts";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { format } from "date-fns";
 
 const BlogPostPage = () => {
   const { id } = useParams();
@@ -160,7 +161,9 @@ const BlogPostPage = () => {
           ) : (
             <article className="prose prose-stone lg:prose-lg max-w-none">
               <div className="flex items-center gap-4 mb-6">
-                <span className="text-sm text-gray-500">{post.date}</span>
+                <span className="text-sm text-gray-500">
+                  {format(new Date(post.date), 'MMMM d, yyyy')}
+                </span>
                 <span className="text-sm px-3 py-1 bg-accent/10 text-accent rounded-full">
                   {post.category}
                 </span>
