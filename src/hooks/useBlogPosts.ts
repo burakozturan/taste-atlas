@@ -82,9 +82,9 @@ export const useBlogPosts = () => {
       // First check if the post exists
       const { data: existingPost, error: checkError } = await supabase
         .from('blog_posts')
-        .select('id') // Only select ID to minimize data transfer
+        .select('id')
         .eq('id', post.id)
-        .maybeSingle(); // Use maybeSingle() instead of single() to avoid 406 error
+        .maybeSingle();
 
       if (checkError) {
         console.error('Error checking post existence:', checkError);
@@ -112,13 +112,23 @@ export const useBlogPosts = () => {
         })
         .eq('id', post.id)
         .select()
-        .single();
+        .maybeSingle();  // Changed from single() to maybeSingle()
 
       if (error) {
         console.error('Error updating post:', error);
         toast({
           title: 'Error updating post',
           description: error.message,
+          variant: 'destructive',
+        });
+        throw error;
+      }
+      
+      if (!data) {
+        const error = new Error('Failed to update post');
+        toast({
+          title: 'Update Failed',
+          description: 'The post could not be updated. Please try again.',
           variant: 'destructive',
         });
         throw error;
