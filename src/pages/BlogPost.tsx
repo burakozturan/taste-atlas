@@ -28,22 +28,23 @@ const BlogPostPage = () => {
   };
 
   const handleSave = async () => {
+    if (!post) return;
+    
     try {
-      let imageUrl = post?.image_url;
+      let imageUrl = post.image_url;
       
       if (selectedImage) {
         imageUrl = await uploadImage(selectedImage);
       }
 
-      if (post) {
-        await updatePost.mutateAsync({
-          ...post,
-          content: editedContent,
-          image_url: imageUrl,
-        });
-      }
+      await updatePost.mutateAsync({
+        ...post,
+        content: editedContent,
+        image_url: imageUrl,
+      });
 
       setIsEditing(false);
+      setSelectedImage(null);
     } catch (error) {
       console.error('Error saving post:', error);
     }
