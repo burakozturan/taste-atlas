@@ -40,7 +40,6 @@ export const useBlogPosts = () => {
     mutationFn: async ({ id, content, image_url }: { id: string; content: string; image_url?: string }) => {
       console.log('Updating post with data:', { id, content, image_url });
       
-      // First check if the post exists
       const { data: existingPost, error: fetchError } = await supabase
         .from('blog_posts')
         .select()
@@ -75,23 +74,13 @@ export const useBlogPosts = () => {
         })
         .eq('id', id)
         .select()
-        .maybeSingle();
+        .single();
 
       if (updateError) {
         console.error('Error updating post:', updateError);
         toast({
           title: 'Error updating post',
           description: updateError.message,
-          variant: 'destructive',
-        });
-        throw updateError;
-      }
-
-      if (!data) {
-        const updateError = new Error('Failed to update post');
-        toast({
-          title: 'Update Failed',
-          description: 'The post could not be updated. Please try again.',
           variant: 'destructive',
         });
         throw updateError;
@@ -104,7 +93,16 @@ export const useBlogPosts = () => {
       
       return data as BlogPost;
     },
-    onSuccess: () => {
+    onSuccess: (updatedPost) => {
+      // Update the cache with the new post data
+      queryClient.setQueryData(['blog-posts'], (oldPosts: BlogPost[] | undefined) => {
+        if (!oldPosts) return [updatedPost];
+        return oldPosts.map(post => 
+          post.id === updatedPost.id ? updatedPost : post
+        );
+      });
+      
+      // Also invalidate the query to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
     },
   });
