@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useBlogPosts } from "@/hooks/useBlogPosts";
+import { format } from "date-fns";
 
 export const Blog = () => {
   const { posts, isLoading } = useBlogPosts();
@@ -68,7 +69,7 @@ export const Blog = () => {
               <div className="p-6">
                 <div className="flex items-center gap-4 mb-4">
                   <span className="text-sm text-gray-500">
-                    {new Date(post.date).toLocaleDateString()}
+                    {format(new Date(post.date), 'MMMM d, yyyy')}
                   </span>
                   <span className="text-sm px-3 py-1 bg-accent/10 text-accent rounded-full">
                     {post.category}
