@@ -77,7 +77,9 @@ export const useBlogPosts = () => {
 
   const updatePost = useMutation({
     mutationFn: async (post: BlogPost) => {
-      const { error } = await supabase
+      console.log('Updating post with data:', post); // Debug log
+      
+      const { data, error } = await supabase
         .from('blog_posts')
         .update({
           title: post.title,
@@ -85,7 +87,9 @@ export const useBlogPosts = () => {
           image_url: post.image_url,
           category: post.category,
         })
-        .eq('id', post.id);
+        .eq('id', post.id)
+        .select()
+        .single();
 
       if (error) {
         console.error('Error updating post:', error);
@@ -97,12 +101,14 @@ export const useBlogPosts = () => {
         throw error;
       }
       
+      console.log('Post updated successfully:', data); // Debug log
+      
       toast({
         title: 'Success',
         description: 'Blog post updated successfully',
       });
       
-      return post;
+      return data as BlogPost;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
