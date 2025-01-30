@@ -27,6 +27,13 @@ const BlogPostPage = () => {
     setEditedContent(event.target.value);
   };
 
+  const handleEditClick = () => {
+    if (post) {
+      setEditedContent(post.content);
+      setIsEditing(true);
+    }
+  };
+
   const handleSave = async () => {
     if (!post) return;
     
@@ -37,23 +44,29 @@ const BlogPostPage = () => {
         imageUrl = await uploadImage(selectedImage);
       }
 
-      await updatePost.mutateAsync({
+      const updatedPost = {
         ...post,
         content: editedContent,
         image_url: imageUrl,
-      });
+      };
 
+      await updatePost.mutateAsync(updatedPost);
       setIsEditing(false);
       setSelectedImage(null);
+
+      // Show success toast
+      toast({
+        title: "Success",
+        description: "Your changes have been saved successfully.",
+      });
     } catch (error) {
       console.error('Error saving post:', error);
-    }
-  };
-
-  const handleEditClick = () => {
-    if (post) {
-      setEditedContent(post.content);
-      setIsEditing(true);
+      // Show error toast
+      toast({
+        title: "Error",
+        description: "Failed to save changes. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
