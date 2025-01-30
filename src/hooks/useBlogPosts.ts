@@ -82,21 +82,23 @@ export const useBlogPosts = () => {
       // First check if the post exists
       const { data: existingPost, error: checkError } = await supabase
         .from('blog_posts')
-        .select('*')
+        .select('id') // Only select ID to minimize data transfer
         .eq('id', post.id)
-        .single();
+        .maybeSingle(); // Use maybeSingle() instead of single() to avoid 406 error
 
       if (checkError) {
         console.error('Error checking post existence:', checkError);
-        if (checkError.message.includes('contains 0 rows')) {
-          toast({
-            title: 'Post Not Found',
-            description: 'This blog post may have been deleted. Please return to the blog listing.',
-            variant: 'destructive',
-          });
-          throw new Error('Post not found');
-        }
         throw checkError;
+      }
+
+      if (!existingPost) {
+        const error = new Error('Post not found');
+        toast({
+          title: 'Post Not Found',
+          description: 'This blog post may have been deleted. Please return to the blog listing.',
+          variant: 'destructive',
+        });
+        throw error;
       }
 
       // If post exists, proceed with update
