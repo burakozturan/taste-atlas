@@ -14,8 +14,11 @@ const BlogPostPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
   const { posts, isLoading, updatePost, uploadImage } = useBlogPosts();
-  const post = posts?.find(post => post.id === id);
+  
+  // Find the post immediately when posts are loaded
+  const post = posts?.find(p => p.id === id);
 
+  // Handle non-existent post
   useEffect(() => {
     if (!isLoading && !post) {
       toast({
@@ -23,12 +26,20 @@ const BlogPostPage = () => {
         description: "This blog post doesn't exist. Redirecting you to the blog listing.",
         variant: "destructive",
       });
+      // Redirect after a short delay
       setTimeout(() => navigate("/"), 2000);
     }
   }, [isLoading, post, navigate, toast]);
 
   const handleSave = async (content: string, imageFile: File | null) => {
-    if (!post) return;
+    if (!post) {
+      toast({
+        title: "Error",
+        description: "Cannot update a non-existent post.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
       let imageUrl = post.image_url;
@@ -44,18 +55,8 @@ const BlogPostPage = () => {
       });
 
       setIsEditing(false);
-
-      toast({
-        title: "Success",
-        description: "Your changes have been saved successfully.",
-      });
     } catch (error) {
       console.error('Error saving post:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save changes. Please try again.",
-        variant: "destructive",
-      });
     }
   };
 
