@@ -92,12 +92,13 @@ export const useBlogPosts = () => {
       }
 
       if (!existingPost) {
+        const error = new Error('Post not found');
         toast({
           title: 'Post Not Found',
           description: 'This blog post does not exist. Please return to the blog listing.',
           variant: 'destructive',
         });
-        throw new Error('Post not found');
+        throw error;
       }
 
       // If post exists, proceed with update
@@ -124,12 +125,13 @@ export const useBlogPosts = () => {
       }
 
       if (!data) {
+        const updateError = new Error('Failed to update post');
         toast({
           title: 'Update Failed',
           description: 'The post could not be updated. Please try again.',
           variant: 'destructive',
         });
-        throw new Error('Failed to update post');
+        throw updateError;
       }
 
       toast({
