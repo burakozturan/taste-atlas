@@ -46,12 +46,12 @@ export const useBlogPosts = () => {
               '  (\'Mediterranean Spice Routes\', \'Journey through the historic spice trading paths...\', \'/placeholder.svg\', NOW(), \'Culture\'),\n' +
               '  (\'Traditional Preservation Methods\', \'Learn about ancient food preservation techniques...\', \'/placeholder.svg\', NOW(), \'Techniques\');\n\n' +
               'ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;\n\n' +
-              'CREATE POLICY "Allow anonymous read access"\n' +
+              'CREATE POLICY "Allow public read access"\n' +
               '  ON public.blog_posts\n' +
               '  FOR SELECT\n' +
-              '  TO anon\n' +
+              '  TO public\n' +
               '  USING (true);\n\n' +
-              'CREATE POLICY "Enable insert for authenticated users only"\n' +
+              'CREATE POLICY "Allow authenticated users to update posts"\n' +
               '  ON public.blog_posts\n' +
               '  FOR UPDATE\n' +
               '  TO authenticated\n' +
@@ -78,12 +78,28 @@ export const useBlogPosts = () => {
       const { error } = await supabase
         .from('blog_posts')
         .update({
+          title: post.title,
           content: post.content,
           image_url: post.image_url,
+          category: post.category,
         })
         .eq('id', post.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating post:', error);
+        toast({
+          title: 'Error updating post',
+          description: error.message,
+          variant: 'destructive',
+        });
+        throw error;
+      }
+      
+      toast({
+        title: 'Success',
+        description: 'Blog post updated successfully',
+      });
+      
       return post;
     },
     onSuccess: () => {
