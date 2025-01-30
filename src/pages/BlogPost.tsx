@@ -1,12 +1,14 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useBlogPosts } from "@/hooks/useBlogPosts";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { BlogPostEditor } from "@/components/BlogPostEditor";
 import { BlogPostContent } from "@/components/BlogPostContent";
 import { BlogNavigation } from "@/components/BlogNavigation";
+import { Button } from "@/components/ui/button";
+import { Home } from "lucide-react";
 
 const BlogPostPage = () => {
   const { id } = useParams();
@@ -23,13 +25,11 @@ const BlogPostPage = () => {
     if (!isLoading && !post) {
       toast({
         title: "Post Not Found",
-        description: "This blog post doesn't exist. Redirecting you to the blog listing.",
+        description: "This blog post doesn't exist.",
         variant: "destructive",
       });
-      // Redirect after a short delay
-      setTimeout(() => navigate("/"), 2000);
     }
-  }, [isLoading, post, navigate, toast]);
+  }, [isLoading, post, toast]);
 
   const handleSave = async (content: string, imageFile: File | null) => {
     if (!post) {
@@ -49,7 +49,7 @@ const BlogPostPage = () => {
       }
 
       await updatePost.mutateAsync({
-        ...post,
+        id: post.id,
         content,
         image_url: imageUrl,
       });
@@ -79,12 +79,18 @@ const BlogPostPage = () => {
     return (
       <div className="min-h-screen bg-stone-50 py-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <BlogNavigation />
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="mb-6">
+            <AlertTitle>Post not found</AlertTitle>
             <AlertDescription>
-              Post not found. Redirecting you to the blog listing...
+              The blog post you're looking for doesn't exist or has been removed.
             </AlertDescription>
           </Alert>
+          <Link to="/">
+            <Button className="gap-2">
+              <Home className="h-4 w-4" />
+              Return to Home
+            </Button>
+          </Link>
         </div>
       </div>
     );
