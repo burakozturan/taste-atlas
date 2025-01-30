@@ -82,12 +82,18 @@ export const useBlogPosts = () => {
       // First check if the post exists
       const { data: existingPost, error: checkError } = await supabase
         .from('blog_posts')
-        .select('*')
+        .select()
         .eq('id', post.id)
-        .maybeSingle();
+        .limit(1)
+        .single();
 
       if (checkError) {
         console.error('Error checking post existence:', checkError);
+        toast({
+          title: 'Error',
+          description: 'Failed to verify post existence',
+          variant: 'destructive',
+        });
         throw checkError;
       }
 
@@ -112,7 +118,8 @@ export const useBlogPosts = () => {
         })
         .eq('id', post.id)
         .select()
-        .maybeSingle();
+        .limit(1)
+        .single();
 
       if (error) {
         console.error('Error updating post:', error);
