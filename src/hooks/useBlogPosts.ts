@@ -23,11 +23,20 @@ export const useBlogPosts = () => {
         .order('date', { ascending: false });
 
       if (error) {
-        toast({
-          title: 'Error fetching posts',
-          description: 'Please ensure the blog_posts table exists in your database.',
-          variant: 'destructive',
-        });
+        // Check specifically for the missing table error
+        if (error.code === '42P01') {
+          toast({
+            title: 'Database Setup Required',
+            description: 'The blog_posts table is missing. Please create it using the following SQL:\n\nCREATE TABLE public.blog_posts (\n  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,\n  title TEXT NOT NULL,\n  content TEXT NOT NULL,\n  image_url TEXT NOT NULL,\n  date TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE(\'UTC\', NOW()),\n  category TEXT NOT NULL\n);',
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Error fetching posts',
+            description: error.message,
+            variant: 'destructive',
+          });
+        }
         throw error;
       }
 
