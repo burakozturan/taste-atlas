@@ -77,8 +77,30 @@ export const useBlogPosts = () => {
 
   const updatePost = useMutation({
     mutationFn: async (post: BlogPost) => {
-      console.log('Updating post with data:', post); // Debug log
+      console.log('Updating post with data:', post);
       
+      // First check if the post exists
+      const { data: existingPost, error: checkError } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('id', post.id)
+        .single();
+
+      if (checkError) {
+        if (checkError.message.includes('contains 0 rows')) {
+          const error = new Error('Post not found. It may have been deleted.');
+          console.error('Error checking post:', error);
+          toast({
+            title: 'Error updating post',
+            description: 'Post not found. It may have been deleted.',
+            variant: 'destructive',
+          });
+          throw error;
+        }
+        throw checkError;
+      }
+
+      // If post exists, proceed with update
       const { data, error } = await supabase
         .from('blog_posts')
         .update({
@@ -101,7 +123,7 @@ export const useBlogPosts = () => {
         throw error;
       }
       
-      console.log('Post updated successfully:', data); // Debug log
+      console.log('Post updated successfully:', data);
       
       toast({
         title: 'Success',
