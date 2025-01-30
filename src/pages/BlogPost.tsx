@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useBlogPosts } from "@/hooks/useBlogPosts";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -10,10 +10,22 @@ import { BlogNavigation } from "@/components/BlogNavigation";
 
 const BlogPostPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
   const { posts, isLoading, updatePost, uploadImage } = useBlogPosts();
   const post = posts?.find(post => post.id === id);
+
+  useEffect(() => {
+    if (!isLoading && !post) {
+      toast({
+        title: "Post Not Found",
+        description: "This blog post doesn't exist. Redirecting you to the blog listing.",
+        variant: "destructive",
+      });
+      setTimeout(() => navigate("/"), 2000);
+    }
+  }, [isLoading, post, navigate, toast]);
 
   const handleSave = async (content: string, imageFile: File | null) => {
     if (!post) return;
@@ -69,8 +81,7 @@ const BlogPostPage = () => {
           <BlogNavigation />
           <Alert variant="destructive">
             <AlertDescription>
-              Post not found. This could be because the blog posts table hasn't been created in the database yet.
-              Please ensure the database is properly set up.
+              Post not found. Redirecting you to the blog listing...
             </AlertDescription>
           </Alert>
         </div>
