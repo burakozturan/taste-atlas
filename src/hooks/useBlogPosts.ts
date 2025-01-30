@@ -33,6 +33,7 @@ export const useBlogPosts = () => {
               '2. Open the SQL editor\n' +
               '3. Copy and paste the SQL commands below\n' +
               '4. Click "Run"\n\n' +
+              '-- First, create the table and add sample data:\n' +
               'CREATE TABLE public.blog_posts (\n' +
               '  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,\n' +
               '  title TEXT NOT NULL,\n' +
@@ -45,6 +46,7 @@ export const useBlogPosts = () => {
               '  (\'Ancient Grains of Mesopotamia\', \'Discover the rich history of grains that shaped civilization...\', \'/placeholder.svg\', NOW(), \'History\'),\n' +
               '  (\'Mediterranean Spice Routes\', \'Journey through the historic spice trading paths...\', \'/placeholder.svg\', NOW(), \'Culture\'),\n' +
               '  (\'Traditional Preservation Methods\', \'Learn about ancient food preservation techniques...\', \'/placeholder.svg\', NOW(), \'Techniques\');\n\n' +
+              '-- Then, set up Row Level Security (RLS):\n' +
               'ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;\n\n' +
               'CREATE POLICY "Allow public read access"\n' +
               '  ON public.blog_posts\n' +
