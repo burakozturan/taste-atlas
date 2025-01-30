@@ -38,8 +38,6 @@ export const useBlogPosts = () => {
 
   const updatePost = useMutation({
     mutationFn: async ({ id, content, image_url }: { id: string; content: string; image_url?: string }) => {
-      console.log('Updating post with data:', { id, content, image_url });
-      
       const updateData = {
         content,
         ...(image_url && { image_url })
@@ -50,7 +48,7 @@ export const useBlogPosts = () => {
         .update(updateData)
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error updating post:', error);
