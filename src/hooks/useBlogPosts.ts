@@ -87,15 +87,14 @@ export const useBlogPosts = () => {
         .single();
 
       if (checkError) {
+        console.error('Error checking post existence:', checkError);
         if (checkError.message.includes('contains 0 rows')) {
-          const error = new Error('Post not found. It may have been deleted.');
-          console.error('Error checking post:', error);
           toast({
-            title: 'Error updating post',
-            description: 'Post not found. It may have been deleted.',
+            title: 'Post Not Found',
+            description: 'This blog post may have been deleted. Please return to the blog listing.',
             variant: 'destructive',
           });
-          throw error;
+          throw new Error('Post not found');
         }
         throw checkError;
       }
