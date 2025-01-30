@@ -23,51 +23,12 @@ export const useBlogPosts = () => {
         .order('date', { ascending: false });
 
       if (error) {
-        if (error.code === '42P01') {
-          console.error('Blog posts table is missing. Please create it using the SQL commands shown in the toast message.');
-          
-          toast({
-            title: '⚠️ Database Setup Required',
-            description: 'The blog_posts table is missing. Please follow these steps:\n\n' +
-              '1. Go to your Supabase dashboard\n' +
-              '2. Open the SQL editor\n' +
-              '3. Copy and paste the SQL commands below\n' +
-              '4. Click "Run"\n\n' +
-              '-- First, create the table and add sample data:\n' +
-              'CREATE TABLE public.blog_posts (\n' +
-              '  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,\n' +
-              '  title TEXT NOT NULL,\n' +
-              '  content TEXT NOT NULL,\n' +
-              '  image_url TEXT NOT NULL,\n' +
-              '  date TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE(\'UTC\', NOW()),\n' +
-              '  category TEXT NOT NULL\n' +
-              ');\n\n' +
-              'INSERT INTO public.blog_posts (title, content, image_url, date, category) VALUES\n' +
-              '  (\'Ancient Grains of Mesopotamia\', \'Discover the rich history of grains that shaped civilization...\', \'/placeholder.svg\', NOW(), \'History\'),\n' +
-              '  (\'Mediterranean Spice Routes\', \'Journey through the historic spice trading paths...\', \'/placeholder.svg\', NOW(), \'Culture\'),\n' +
-              '  (\'Traditional Preservation Methods\', \'Learn about ancient food preservation techniques...\', \'/placeholder.svg\', NOW(), \'Techniques\');\n\n' +
-              '-- Then, set up Row Level Security (RLS):\n' +
-              'ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;\n\n' +
-              'CREATE POLICY "Allow public read access"\n' +
-              '  ON public.blog_posts\n' +
-              '  FOR SELECT\n' +
-              '  TO public\n' +
-              '  USING (true);\n\n' +
-              'CREATE POLICY "Allow authenticated users to update posts"\n' +
-              '  ON public.blog_posts\n' +
-              '  FOR UPDATE\n' +
-              '  TO authenticated\n' +
-              '  USING (true);',
-            variant: 'destructive',
-            duration: 15000,
-          });
-        } else {
-          toast({
-            title: 'Error fetching posts',
-            description: error.message,
-            variant: 'destructive',
-          });
-        }
+        console.error('Error fetching posts:', error);
+        toast({
+          title: 'Error fetching posts',
+          description: error.message,
+          variant: 'destructive',
+        });
         throw error;
       }
 
@@ -79,7 +40,34 @@ export const useBlogPosts = () => {
     mutationFn: async ({ id, content, image_url }: { id: string; content: string; image_url?: string }) => {
       console.log('Updating post with data:', { id, content, image_url });
       
-      const { data, error } = await supabase
+      // First check if the post exists
+      const { data: existingPost, error: fetchError } = await supabase
+        .from('blog_posts')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error('Error checking post existence:', fetchError);
+        toast({
+          title: 'Error',
+          description: 'Could not verify post existence',
+          variant: 'destructive',
+        });
+        throw fetchError;
+      }
+
+      if (!existingPost) {
+        const notFoundError = new Error('Blog post not found');
+        toast({
+          title: 'Error',
+          description: 'The blog post you are trying to edit does not exist',
+          variant: 'destructive',
+        });
+        throw notFoundError;
+      }
+
+      const { data, error: updateError } = await supabase
         .from('blog_posts')
         .update({ 
           content,
@@ -89,14 +77,14 @@ export const useBlogPosts = () => {
         .select()
         .maybeSingle();
 
-      if (error) {
-        console.error('Error updating post:', error);
+      if (updateError) {
+        console.error('Error updating post:', updateError);
         toast({
           title: 'Error updating post',
-          description: error.message,
+          description: updateError.message,
           variant: 'destructive',
         });
-        throw error;
+        throw updateError;
       }
 
       if (!data) {
