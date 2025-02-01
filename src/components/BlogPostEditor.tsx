@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { BlogPost } from "@/hooks/useBlogPosts";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 interface BlogPostEditorProps {
   post: BlogPost;
-  onSave: (content: string, imageFile: File | null) => Promise<void>;
+  onSave: (title: string, content: string, imageFile: File | null) => Promise<void>;
   onCancel: () => void;
 }
 
 export const BlogPostEditor = ({ post, onSave, onCancel }: BlogPostEditorProps) => {
+  const [editedTitle, setEditedTitle] = useState(post.title);
   const [editedContent, setEditedContent] = useState(post.content);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
@@ -19,12 +21,26 @@ export const BlogPostEditor = ({ post, onSave, onCancel }: BlogPostEditorProps) 
     }
   };
 
+  const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEditedTitle(event.target.value);
+  };
+
   const handleContentChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setEditedContent(event.target.value);
   };
 
   return (
     <div className="space-y-6">
+      <div>
+        <Input
+          type="text"
+          value={editedTitle}
+          onChange={handleTitleChange}
+          placeholder="Post title"
+          className="text-xl font-bold mb-4"
+        />
+      </div>
+
       <div className="mb-8">
         <input
           type="file"
@@ -54,7 +70,7 @@ export const BlogPostEditor = ({ post, onSave, onCancel }: BlogPostEditorProps) 
           Cancel
         </Button>
         <Button 
-          onClick={() => onSave(editedContent, selectedImage)}
+          onClick={() => onSave(editedTitle, editedContent, selectedImage)}
         >
           Save Changes
         </Button>

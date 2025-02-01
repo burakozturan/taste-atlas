@@ -31,7 +31,7 @@ const BlogPostPage = () => {
     }
   }, [isLoading, post, toast]);
 
-  const handleSave = async (content: string, imageFile: File | null) => {
+  const handleSave = async (title: string, content: string, imageFile: File | null) => {
     if (!post) {
       toast({
         title: "Error",
@@ -50,6 +50,7 @@ const BlogPostPage = () => {
 
       await updatePost.mutateAsync({
         id: post.id,
+        title,
         content,
         image_url: imageUrl,
       });
