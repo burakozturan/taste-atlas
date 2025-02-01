@@ -25,7 +25,7 @@ export const BlogPostContent = ({ post, onEdit }: BlogPostContentProps) => {
         className="w-full h-64 object-cover rounded-lg mb-6"
       />
       <h1 className="text-3xl font-bold mb-6">{post.title}</h1>
-      <p className="text-gray-600">{post.content}</p>
+      <p className="text-gray-600 whitespace-pre-wrap">{post.content}</p>
       
       <Button
         onClick={onEdit}
