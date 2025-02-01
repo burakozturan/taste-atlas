@@ -2,9 +2,26 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useBlogPosts } from "@/hooks/useBlogPosts";
 import { format } from "date-fns";
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 export const Blog = () => {
   const { posts, isLoading } = useBlogPosts();
+  const [expandedPosts, setExpandedPosts] = useState<string[]>([]);
+
+  const togglePost = (postId: string) => {
+    setExpandedPosts(prev => 
+      prev.includes(postId) 
+        ? prev.filter(id => id !== postId)
+        : [...prev, postId]
+    );
+  };
+
+  const truncateContent = (content: string) => {
+    const words = content.split(' ');
+    if (words.length <= 50) return content;
+    return words.slice(0, 50).join(' ') + '...';
+  };
 
   if (isLoading) {
     return (
@@ -78,12 +95,27 @@ export const Blog = () => {
                 <h3 className="text-xl font-semibold mb-2 text-gray-900">
                   {post.title}
                 </h3>
-                <p className="text-gray-600 mb-4">{post.content}</p>
+                <div className="text-gray-600 mb-4">
+                  <p>{expandedPosts.includes(post.id) ? post.content : truncateContent(post.content)}</p>
+                  {post.content.split(' ').length > 50 && (
+                    <button
+                      onClick={() => togglePost(post.id)}
+                      className="inline-flex items-center gap-2 text-primary font-medium mt-2 hover:text-primary/80 transition-colors"
+                    >
+                      {expandedPosts.includes(post.id) ? 'Show Less' : 'Read More'}
+                      <ChevronDown 
+                        className={`h-4 w-4 transition-transform ${
+                          expandedPosts.includes(post.id) ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+                  )}
+                </div>
                 <Link 
                   to={`/blog/${post.id}`}
                   className="inline-flex items-center text-primary font-medium hover:text-primary/80 transition-colors"
                 >
-                  Read More →
+                  View Full Post →
                 </Link>
               </div>
             </motion.article>
