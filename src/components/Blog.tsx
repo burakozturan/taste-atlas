@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { useBlogPosts } from "@/hooks/useBlogPosts";
 import { format } from "date-fns";
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, PlusCircle } from "lucide-react";
+import { Button } from "./ui/button";
 
 export const Blog = () => {
   const { posts, isLoading } = useBlogPosts();
@@ -63,9 +64,15 @@ export const Blog = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Stories from the Ancient Kitchen
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
             Explore the rich culinary heritage of Mediterranean and Mesopotamian regions
           </p>
+          <Link to="/create-post">
+            <Button className="inline-flex items-center gap-2">
+              <PlusCircle className="h-4 w-4" />
+              Create New Post
+            </Button>
+          </Link>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
