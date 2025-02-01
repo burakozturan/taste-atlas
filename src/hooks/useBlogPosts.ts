@@ -36,6 +36,40 @@ export const useBlogPosts = () => {
     },
   });
 
+  const createPost = useMutation({
+    mutationFn: async ({ title, content, image_url, category }: Omit<BlogPost, 'id' | 'date'>) => {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .insert({
+          title,
+          content,
+          image_url,
+          category,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating post:', error);
+        toast({
+          title: 'Error creating post',
+          description: error.message,
+          variant: 'destructive',
+        });
+        throw error;
+      }
+
+      return data as BlogPost;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
+      toast({
+        title: 'Success',
+        description: 'Blog post created successfully',
+      });
+    },
+  });
+
   const updatePost = useMutation({
     mutationFn: async ({ id, content, image_url }: { id: string; content: string; image_url?: string }) => {
       const updateData = {
@@ -107,6 +141,7 @@ export const useBlogPosts = () => {
   return {
     posts,
     isLoading,
+    createPost,
     updatePost,
     uploadImage,
   };

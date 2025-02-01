@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import BlogPost from "./pages/BlogPost";
 import FeaturedBox from "./pages/FeaturedBox";
 import NewsletterPage from "./pages/NewsletterPage";
+import { CreateBlogPost } from "./components/CreateBlogPost";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/blog/:id" element={<BlogPost />} />
           <Route path="/featured/:id" element={<FeaturedBox />} />
           <Route path="/newsletter" element={<NewsletterPage />} />
+          <Route path="/create-post" element={<CreateBlogPost />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
